@@ -835,7 +835,7 @@ TH1D* createErrorsHistogram(TH1D* originalHistogram) {
 }
 
 void fitks_loop(TString syear, TString binning){
-    RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
+   RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
    RooMsgService::instance().setSilentMode(kTRUE);
    RooMsgService::instance().setStreamStatus(1,false);
    RooMsgService::instance().getStream(1).removeTopic(Integration) ;
@@ -848,14 +848,10 @@ void fitks_loop(TString syear, TString binning){
    RooMsgService::instance().Print() ;
 
    ////Final set of files
-   
-   TString path = "ks_tmp/";
+   TString path = "ks_test/";
    TString Data_Egamma_file = Form("data_egamma_522_2022_ks_trigger_%s", binning.Data());
-   //TString label1 = "EGamma";
    TString Data_Parking_file = Form("data_parking_522_2022_ks_%s", binning.Data());
-   //TString label2 = "EGamma Parking";
    TString MC_TT_file= Form("MC_TT_522_2022_ks_%s", binning.Data());
-   //TString label3 = "DY, W, TT";
    TString MC_W_file= Form("MC_W_522_2022_ks_%s", binning.Data());
    TString MC_DY_file= Form("MC_DY_522_2022_ks_%s", binning.Data());
    TString MC_combined_file= Form("MC_combined_522_2022_ks_%s", binning.Data());
@@ -888,7 +884,6 @@ void fitks_loop(TString syear, TString binning){
    std::string tag;
    for (int i=0; i<8; i++) {
       cout << "BDT is " << opt_points[i] << endl;
-      //if (opt_points[i]=="bdt20" || opt_points[i]=="bdt30" || opt_points[i]=="bdt40" || opt_points[i]=="bdt45" || opt_points[i]=="bdt50") continue; //TODO: remove
       TH1D* egamma_hist = playfit(Data_Egamma_file, path, option, opt_points[i], binning);
       TH1D* parking_hist = playfit(Data_Parking_file, path, option, opt_points[i], binning);
       TH1D* tt_hist = playfit(MC_TT_file, path, option, opt_points[i], binning);
@@ -907,31 +902,11 @@ void fitks_loop(TString syear, TString binning){
       bmm4 = overlay1(ratio_hist, "ratio", path, opt_points[i], "(ratio)", binning);
       bmm4 = overlay2(egamma_hist, parking_hist, "EGamma", "EGamma Parking", path, opt_points[i], "(EGamma_v_Parking)", binning);
       bmm4 = overlay3(w_hist, dy_hist, tt_hist, "W", "DY", "TT", path, opt_points[i], "(W_v_DY_v_TT)", binning);
-
-      /*TH1D* MC_hist = tt_hist;
-      MC_hist->Add(w_hist);
-      MC_hist->Add(dy_hist);
-
-      TH1D* ratio_hist = 
-
-      bmm4 = overlay3( h1_arr, h2_arr, h3_arr, label1, label2, label3, path, opt_points[i],syear, binning); 
-      tag = Form("%s_%s",opt_points[i].Data(),syear.Data());
-      flatDMap[tag]=bmm4;*/
    }
-
-   
-   
-   //json effJson(flatDMap);
-   //fJson << effJson.dump(4) << endl;
-   //fJson.close();
    
 }
-void fitks_diffun_John(){
+void fitks(){
   
-  // fitks_loop("2016");
-  // fitks_loop("2017");
-  // fitks_loop("2018");
-  //fitks_loop("2022", "lxy");
   fitks_loop("2022", "pT");
   fitks_loop("2022", "lxy");
 }
