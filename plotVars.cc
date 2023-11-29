@@ -67,8 +67,8 @@ plotVars::plotVars(void)
 
 TH1D* plotVars::make_histogram(TChain *tC, TString var_name) {
     int NBINS = 50;
-    int bin_min = 0;
-    int bin_max = 10;
+    int bin_min = 5;
+    int bin_max = 30;
 
     TH1D *hist = new TH1D(Form("hist_%s", var_name.Data()), Form("hist_%s", var_name.Data()), NBINS, bin_min, bin_max);
 
@@ -155,7 +155,7 @@ TH1D* plotVars::make_histogram(TChain *tC, TString var_name) {
             
 
             //if (cut_pre_mid) hist->Fill(var[bhad]);
-            if (cut_pre_mid) hist->Fill(V0_kin_pt[bhad]);
+            if (cut_pre) hist->Fill(V0_kin_pt[bhad]);
         }
     }
 
@@ -279,7 +279,11 @@ void plotVars::overlay(TH1D* h1,TH1D* h2, TH1D* h3, TString label1, TString labe
   c1->SetMargin(0.17,0.06,0.13,0.07);
   c1->Clear();
   gStyle->SetOptStat(0);
-  h1->SetTitle(Form(";%s[cm];Events (normalized)", binning.Data()));
+  if (binning=="lxy") {
+    h1->SetTitle(Form(";%s[cm];Events (normalized)", binning.Data()));
+  } else {
+    h1->SetTitle(Form(";%s[GeV];Events (normalized)", binning.Data()));
+  }
   h1->SetLineColor(kRed);
   h2->SetLineColor(kBlue);
   h3->SetLineColor(kGreen);
@@ -324,13 +328,13 @@ int main() {
     TChain *tC1 = new TChain("Events");
     c1.list_dir_file(tC1, "2022_data_ks_parking.txt");
     TH1D* h1 = c1.make_histogram(tC1, "ks_kin_lxy");
-    TString label1 = "parking";
+    TString label1 = "EGamma Parking";
 
     plotVars c2;
     TChain *tC2 = new TChain("Events");
     c2.list_dir_file(tC2, "2022_data_ks_egamma.txt");
     TH1D* h2 = c2.make_histogram(tC2, "ks_kin_lxy");
-    TString label2 = "egamma";
+    TString label2 = "Egamma";
 
     plotVars c3;
     TChain *tC3 = new TChain("Events");
@@ -338,7 +342,7 @@ int main() {
     TH1D* h3 = c3.make_histogram(tC3, "ks_kin_lxy");
     TString label3 = "MC";
 
-    c3.overlay(h1, h2, h3, label1, label2, label3, "blah", "blah", "2022", "lxy");
+    c3.overlay(h1, h2, h3, label1, label2, label3, "blah", "blah", "2022", "pT");
 
     return 0;
 }

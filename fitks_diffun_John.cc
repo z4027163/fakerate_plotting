@@ -57,6 +57,9 @@ vector<double> do_fit(vector<double>&param,TString option, TString name, TString
   RooRealVar C3("C3","",1.0,0.,10.);
   RooRealVar C4("C4","",1.0,0.,10.);
   RooBernstein pdf_cmb("pdf_cmb","",m,RooArgList(RooConst(1.0),C1,C2));
+
+  //RooRealVar exponential_constant("exponential_constant", "", 0, -1, 1);
+  //RooExponential pdf_cmb("pdf_cmb", "", m, exponential_constant);
  
   RooRealVar mean0("mean0","meam",0.495,0.485,0.505);
   RooRealVar sigma0("sigma0","m1",0.003,0.001,0.01);
@@ -574,7 +577,7 @@ TH1D* playfit(TString which_file, TString path, TString option, TString opt_poin
    // if(opt_point.Contains("mediumid"))hv0_fakeid_pt->SetMaximum(0.01);
    // else if (opt_point.Contains("softid"))hv0_fakeid_pt->SetMaximum(0.01);
    // else
-   hv0_fakeid_pt->SetMaximum(0.005);
+   hv0_fakeid_pt->SetMaximum(0.003);
    // string checkname=Form("%s",which_file.Data());
    // if(string::npos != checkname.find("Data")){
    //   hv0_fakeid_pt->SetMinimum(0.0005);
@@ -633,7 +636,7 @@ TH1D* playfit(TString which_file, TString path, TString option, TString opt_poin
 
    return hv0_fakeid_pt;
 }
-std::map<std::string, double> overlay(TH1D* h1,TH1D* h2, TH1D* h3, TString label1, TString label2, TString label3, 
+std::map<std::string, double> overlay3(TH1D* h1,TH1D* h2, TH1D* h3, TString label1, TString label2, TString label3, 
                                       TString path, TString opt_point, TString which_file, TString binning){
   std::map<std::string, double>   nEff;
   TLatex tex;
@@ -644,9 +647,9 @@ std::map<std::string, double> overlay(TH1D* h1,TH1D* h2, TH1D* h3, TString label
   TString title = "#font[61]{CMS}";
   TString title2= "#font[52]{Preliminary}";
   TString title3 = "2022";
-  if(which_file.Contains("MC")) title2 = "#font[52]{Simulation}";
-  if(which_file.Contains("2017"))title3 = "2017";
-  if(which_file.Contains("2016"))title3 = "2016";
+  //if(which_file.Contains("MC")) title2 = "#font[52]{Simulation}";
+  //if(which_file.Contains("2017"))title3 = "2017";
+  //if(which_file.Contains("2016"))title3 = "2016";
   TString title4 = "muon mva = bmm4";
   if(opt_point.Contains("bdt20"))title4="muon mva>0.20";
   if(opt_point.Contains("bdt30"))title4="muon mva>0.30";
@@ -699,6 +702,138 @@ std::map<std::string, double> overlay(TH1D* h1,TH1D* h2, TH1D* h3, TString label
 
 }
 
+std::map<std::string, double> overlay2(TH1D* h1,TH1D* h2, TString label1, TString label2, 
+                                      TString path, TString opt_point, TString which_file, TString binning){
+  std::map<std::string, double>   nEff;
+  TLatex tex;
+  tex.SetTextFont(42);
+  tex.SetTextSize(0.035);
+  tex.SetTextAlign(11);
+  tex.SetNDC();
+  TString title = "#font[61]{CMS}";
+  TString title2= "#font[52]{Preliminary}";
+  TString title3 = "2022";
+  //if(which_file.Contains("MC")) title2 = "#font[52]{Simulation}";
+  //if(which_file.Contains("2017"))title3 = "2017";
+  //if(which_file.Contains("2016"))title3 = "2016";
+  TString title4 = "muon mva = bmm4";
+  if(opt_point.Contains("bdt20"))title4="muon mva>0.20";
+  if(opt_point.Contains("bdt30"))title4="muon mva>0.30";
+  if(opt_point.Contains("bdt40"))title4="muon mva>0.40";
+  if(opt_point.Contains("bdt45"))title4="muon mva>0.45";
+  if(opt_point.Contains("bdt50"))title4="muon mva>0.50";
+  if(opt_point.Contains("bdt55"))title4="muon mva>0.55";
+  if(opt_point.Contains("bdt60"))title4="muon mva>0.60";
+  if(opt_point.Contains("softid"))title4="muon mva = looseid";
+  if(opt_point.Contains("mediumid"))title4="muon mva = mediumid";
+
+  TCanvas* c1=new TCanvas("c1","", 600,600);
+  c1->SetMargin(0.17,0.06,0.13,0.07);
+  c1->Clear();
+  gStyle->SetOptStat(0);
+  if (binning == "pT") {
+    h1->SetTitle(Form(";%s[GeV];Fakerate", binning.Data()));
+  } else {
+    h1->SetTitle(Form(";%s[cm];Fakerate", binning.Data()));
+  }
+  h1->SetLineColor(kRed);
+  h2->SetLineColor(kBlue);
+  h1->SetMarkerColor(kRed);
+  h2->SetMarkerColor(kBlue);
+  h1->SetMarkerStyle(20);
+  h2->SetMarkerStyle(22);
+  h1->Draw();
+  h2->Draw("same");
+
+  TLegend* leg =new TLegend(0.77,0.78,0.9,0.9);
+  //gStyle->SetLegendTextSize(0.043);
+  leg->AddEntry(h1, label1, "ep");
+  leg->AddEntry(h2, label2, "ep");
+  leg->Draw();
+  tex.DrawLatex(0.18,0.94,title);
+  tex.SetTextSize(0.028);
+  tex.DrawLatex(0.26,0.94,title2);
+  tex.DrawLatex(0.80,0.94,title3);
+  tex.DrawLatex(0.45,0.94,title4);
+  c1->SaveAs(Form("%splayV0-ks_kin_%s_muid%s_%s_overlay.pdf",path.Data(),binning.Data(),opt_point.Data(),which_file.Data()));
+  //c1->SaveAs(Form("%splayV0-ks_kin_%s_muid%s_%s_overlay3.png",path.Data(),binning.Data(),opt_point.Data(),which_file.Data()));
+
+  
+  return nEff;
+
+}
+
+std::map<std::string, double> overlay1(TH1D* h1,TString label1, 
+                                      TString path, TString opt_point, TString which_file, TString binning){
+  std::map<std::string, double>   nEff;
+  TLatex tex;
+  tex.SetTextFont(42);
+  tex.SetTextSize(0.035);
+  tex.SetTextAlign(11);
+  tex.SetNDC();
+  TString title = "#font[61]{CMS}";
+  TString title2= "#font[52]{Preliminary}";
+  TString title3 = "2022";
+  //if(which_file.Contains("MC")) title2 = "#font[52]{Simulation}";
+  //if(which_file.Contains("2017"))title3 = "2017";
+  //if(which_file.Contains("2016"))title3 = "2016";
+  TString title4 = "muon mva = bmm4";
+  if(opt_point.Contains("bdt20"))title4="muon mva>0.20";
+  if(opt_point.Contains("bdt30"))title4="muon mva>0.30";
+  if(opt_point.Contains("bdt40"))title4="muon mva>0.40";
+  if(opt_point.Contains("bdt45"))title4="muon mva>0.45";
+  if(opt_point.Contains("bdt50"))title4="muon mva>0.50";
+  if(opt_point.Contains("bdt55"))title4="muon mva>0.55";
+  if(opt_point.Contains("bdt60"))title4="muon mva>0.60";
+  if(opt_point.Contains("softid"))title4="muon mva = looseid";
+  if(opt_point.Contains("mediumid"))title4="muon mva = mediumid";
+
+  TCanvas* c1=new TCanvas("c1","", 600,600);
+  c1->SetMargin(0.17,0.06,0.13,0.07);
+  c1->Clear();
+  gStyle->SetOptStat(0);
+  if (binning == "pT") {
+    h1->SetTitle(Form(";%s[GeV];MC Fakerate / Data Fakerate", binning.Data()));
+  } else {
+    h1->SetTitle(Form(";%s[cm];MC Fakerate / Data Fakerate", binning.Data()));
+  }
+  h1->SetLineColor(kRed);
+  h1->SetMarkerColor(kRed);
+  h1->SetMarkerStyle(20);
+  h1->Draw();
+
+  TLegend* leg =new TLegend(0.77,0.78,0.9,0.9);
+  //gStyle->SetLegendTextSize(0.043);
+  leg->AddEntry(h1, label1, "ep");
+  leg->Draw();
+  tex.DrawLatex(0.18,0.94,title);
+  tex.SetTextSize(0.028);
+  tex.DrawLatex(0.26,0.94,title2);
+  tex.DrawLatex(0.80,0.94,title3);
+  tex.DrawLatex(0.45,0.94,title4);
+  c1->SaveAs(Form("%splayV0-ks_kin_%s_muid%s_%s_overlay.pdf",path.Data(),binning.Data(),opt_point.Data(),which_file.Data()));
+  //c1->SaveAs(Form("%splayV0-ks_kin_%s_muid%s_%s_overlay3.png",path.Data(),binning.Data(),opt_point.Data(),which_file.Data()));
+
+  
+  return nEff;
+
+}
+
+TH1D* createErrorsHistogram(TH1D* originalHistogram) {
+    int nBins = originalHistogram->GetNbinsX();
+    double xMin = originalHistogram->GetXaxis()->GetXmin();
+    double xMax = originalHistogram->GetXaxis()->GetXmax();
+
+    TH1D* errorsHistogram = new TH1D("errorsHistogram", "Errors from Original Histogram", nBins, xMin, xMax);
+
+    for (int bin = 1; bin <= nBins; ++bin) {
+        double binError = originalHistogram->GetBinError(bin);
+        errorsHistogram->SetBinContent(bin, binError);
+    }
+
+    return errorsHistogram;
+}
+
 void fitks_loop(TString syear, TString binning){
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
    RooMsgService::instance().setSilentMode(kTRUE);
@@ -714,13 +849,17 @@ void fitks_loop(TString syear, TString binning){
 
    ////Final set of files
    
-   TString path = "ks/";
-   TString whichfile1 = Form("data_parking_522_2022_ks_%s", binning.Data());
-   TString label1 = "Parking Data";
-   TString whichfile2 = Form("data_egamma_522_2022_ks_trigger_%s", binning.Data());
-   TString label2 = "Egamma Data";
-   TString whichfile3 = Form("MC_DY_522_2022_ks_%s", binning.Data());
-   TString label3 = "DY, W, TT";
+   TString path = "ks_tmp/";
+   TString Data_Egamma_file = Form("data_egamma_522_2022_ks_trigger_%s", binning.Data());
+   //TString label1 = "EGamma";
+   TString Data_Parking_file = Form("data_parking_522_2022_ks_%s", binning.Data());
+   //TString label2 = "EGamma Parking";
+   TString MC_TT_file= Form("MC_TT_522_2022_ks_%s", binning.Data());
+   //TString label3 = "DY, W, TT";
+   TString MC_W_file= Form("MC_W_522_2022_ks_%s", binning.Data());
+   TString MC_DY_file= Form("MC_DY_522_2022_ks_%s", binning.Data());
+   TString MC_combined_file= Form("MC_combined_522_2022_ks_%s", binning.Data());
+   TString Data_combined_file= Form("data_combined_522_2022_ks_trigger_%s", binning.Data());
 
 
    std::map<std::string, std::map<std::string, double>> flatDMap;
@@ -750,12 +889,34 @@ void fitks_loop(TString syear, TString binning){
    for (int i=0; i<8; i++) {
       cout << "BDT is " << opt_points[i] << endl;
       //if (opt_points[i]=="bdt20" || opt_points[i]=="bdt30" || opt_points[i]=="bdt40" || opt_points[i]=="bdt45" || opt_points[i]=="bdt50") continue; //TODO: remove
-      TH1D* h1_arr = playfit(whichfile1, path, option, opt_points[i], binning);
-      TH1D* h2_arr = playfit(whichfile2, path, option, opt_points[i], binning);
-      TH1D* h3_arr = playfit(whichfile3, path, option, opt_points[i], binning);
-      bmm4 = overlay( h1_arr, h2_arr, h3_arr, label1, label2, label3, path, opt_points[i],syear, binning); 
+      TH1D* egamma_hist = playfit(Data_Egamma_file, path, option, opt_points[i], binning);
+      TH1D* parking_hist = playfit(Data_Parking_file, path, option, opt_points[i], binning);
+      TH1D* tt_hist = playfit(MC_TT_file, path, option, opt_points[i], binning);
+      TH1D* w_hist = playfit(MC_W_file, path, option, opt_points[i], binning);
+      TH1D* dy_hist = playfit(MC_DY_file, path, option, opt_points[i], binning);
+      TH1D* MC_hist = playfit(MC_combined_file, path, option, opt_points[i], binning);
+      TH1D* data_hist = playfit(Data_combined_file, path, option, opt_points[i], binning);
+
+      bmm4 = overlay2(MC_hist, data_hist, "MC", "Data", path, opt_points[i], "(MC_v_Data)", binning);
+
+      TH1D* ratio_hist = MC_hist;
+      ratio_hist->SetMinimum(0.7);
+      ratio_hist->SetMaximum(2);
+      ratio_hist->Divide(data_hist);
+
+      bmm4 = overlay1(ratio_hist, "ratio", path, opt_points[i], "(ratio)", binning);
+      bmm4 = overlay2(egamma_hist, parking_hist, "EGamma", "EGamma Parking", path, opt_points[i], "(EGamma_v_Parking)", binning);
+      bmm4 = overlay3(w_hist, dy_hist, tt_hist, "W", "DY", "TT", path, opt_points[i], "(W_v_DY_v_TT)", binning);
+
+      /*TH1D* MC_hist = tt_hist;
+      MC_hist->Add(w_hist);
+      MC_hist->Add(dy_hist);
+
+      TH1D* ratio_hist = 
+
+      bmm4 = overlay3( h1_arr, h2_arr, h3_arr, label1, label2, label3, path, opt_points[i],syear, binning); 
       tag = Form("%s_%s",opt_points[i].Data(),syear.Data());
-      flatDMap[tag]=bmm4;
+      flatDMap[tag]=bmm4;*/
    }
 
    

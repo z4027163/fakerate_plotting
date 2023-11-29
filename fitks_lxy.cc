@@ -7,12 +7,13 @@
 #include "RooAddPdf.h"
 #include "RooFitResult.h"
 using namespace RooFit;
+using namespace std;
 
 vector<double> do_fit(vector<double>&param,TString option, TString name, TString ref, TString nameof, TString outname, TString pathto, TString opt_point) {
   //TFile *f1 = new TFile(Form("/eos/home-c/ckar/www/plot/Fakerate/Files_UL/histo_%s.root",nameof.Data()));
   //TFile *f1 = new TFile(Form("/eos/home-c/ckar/www/plot/Fakerate/Files_UL/histo_Weight_%s.root",nameof.Data()));
 
-  TFile *f1 = new TFile(Form("ks/histo_Weight_%s.root",nameof.Data()));   
+  TFile *f1 = new TFile(Form("%shisto_Weight_%s.root",pathto.Data(),nameof.Data()));   
   TH1D *h1 = (TH1D*)f1->Get(name);
   TH1D *h2 = (TH1D*)f1->Get(ref);
   cout<<ref<<" bin "<<h2->GetSumOfWeights()<<" int  "<<h2->Integral()<<endl;
@@ -117,11 +118,10 @@ vector<double> do_fit(vector<double>&param,TString option, TString name, TString
   tex.SetTextSize(0.035);
   tex.SetTextAlign(11);
   tex.SetNDC();
-  TString title3= "MC";
   string changename=Form("%s",nameof.Data());
-  if(string::npos != changename.find("Data") && string::npos != changename.find("2018") )title3= "#font[42]{60 fb^{-1}(13 TeV)}";
-  if(string::npos != changename.find("Data") && string::npos != changename.find("2017") )title3= "#font[42]{47 fb^{-1}(13 TeV)}";
-  if(string::npos != changename.find("Data") && string::npos != changename.find("2016") )title3= "#font[42]{36 fb^{-1}(13 TeV)}";
+  //if(string::npos != changename.find("Data") && string::npos != changename.find("2018") )title3= "#font[42]{60 fb^{-1}(13 TeV)}";
+  //if(string::npos != changename.find("Data") && string::npos != changename.find("2017") )title3= "#font[42]{47 fb^{-1}(13 TeV)}";
+  //if(string::npos != changename.find("Data") && string::npos != changename.find("2016") )title3= "#font[42]{36 fb^{-1}(13 TeV)}";
 
   TString title4= "bla";
   TString title_f = "bla";
@@ -140,7 +140,6 @@ vector<double> do_fit(vector<double>&param,TString option, TString name, TString
   tex.DrawLatex(0.14,0.94,title);
   tex.SetTextSize(0.028);
   tex.DrawLatex(0.22,0.94,title2);
-  tex.DrawLatex(0.425,0.94,title3);
   tex.DrawLatex(0.16,0.84,title_f);
   RooArgSet norm0(m);
   double chisq0 = 0.;
@@ -165,8 +164,20 @@ vector<double> do_fit(vector<double>&param,TString option, TString name, TString
   //int n_param1 = fitout->floatParsFinal().getSize();
   TString title5= Form("#chi^{2}/Ndf = %0.2f ",chisq0/((h2->GetSize()-2)-n_param1));
   tex.DrawLatex(0.16,0.80,title5);
-  canvas->SaveAs(Form("%s/Combined_%s_%s.png",pathto.Data(),ref.Data(),modf.c_str()));
-  canvas->SaveAs(Form("%s/Combined_%s_%s.pdf",pathto.Data(),ref.Data(),modf.c_str()));
+  TString title3 = "muon noID";
+  if(opt_point.Contains("bdt20"))title3="muon mva>0.20";
+  if(opt_point.Contains("bdt30"))title3="muon mva>0.30";
+  if(opt_point.Contains("bdt40"))title3="muon mva>0.40";
+  if(opt_point.Contains("bdt45"))title3="muon mva>0.45";
+  if(opt_point.Contains("bdt50"))title3="muon mva>0.50";
+  if(opt_point.Contains("bdt55"))title3="muon mva>0.55";
+  if(opt_point.Contains("bdt60"))title3="muon mva>0.60";
+  if(opt_point.Contains("softid"))title3="muon mva = looseid";
+  if(opt_point.Contains("mediumid"))title3="muon mva = mediumid";
+  if(opt_point.Contains("muid"))title3="muon mva = bmm4";
+  tex.DrawLatex(0.425,0.94,title3);
+  canvas->SaveAs(Form("%s/Combined_%s_%s_%s.png",pathto.Data(),nameof.Data(),ref.Data(),modf.c_str()));
+  canvas->SaveAs(Form("%s/Combined_%s_%s_%s.pdf",pathto.Data(),nameof.Data(),ref.Data(),modf.c_str()));
 
   cout<<"now  bin fit"<<endl;
   nsig.setMax(h1->GetSumOfWeights());
@@ -511,9 +522,12 @@ std::map<std::string, double> overlay(TH1D* hData,TH1D* hMC,TString path, TStrin
   hMC->Draw("same");
 
   TLegend* leg =new TLegend(0.77,0.78,0.9,0.9);
-  gStyle->SetLegendTextSize(0.043);
-  leg->AddEntry(hData, "Data", "ep");
-  leg->AddEntry(hMC, "MC", "ep");
+  //gStyle->SetLegendTextSize(0.043); 
+  //leg->AddEntry(hData, "Data", "ep");
+  //leg->AddEntry(hMC, "MC", "ep");
+  //TODO: make legend changes better
+  leg->AddEntry(hData, "Parking", "ep");
+  leg->AddEntry(hMC, "EGamma", "ep");
   leg->Draw();
   tex.DrawLatex(0.18,0.94,title);
   tex.SetTextSize(0.028);
@@ -639,10 +653,13 @@ void fitks_lxy(){
    // playfit(whichfileM, path, option);
    // playfit(whichfileD, path, option);
    
-   TString whichfileD = "Data_521_2022_ks_egamma_lxy_220821";
-   //TString whichfileD = "Data_516_allyear_ks_egamma_lxy_180821";
-   TString whichfileM = "MC_516_allyear_ks_lxy_WDY180821";
-   TString path = "ks/";
+   //TString whichfileD = "Data_521_2022_ks_egamma_lxy_220821";
+   //TString whichfileM = "Data_521_2022_ks_parking_lxy_220821";
+   //TString whichfileD = "Data_521_2022_ks_parking_trig_lxy_220821";
+   //TString whichfileM = "Data_521_2022_ks_egamma_trig_lxy_220821";
+   TString whichfileD = "Data_521_2022_ks_MCall_lxy_220821";
+   TString whichfileM = whichfileD;
+   TString path = "ks_MC_new/";
    TString syear = "2022";
    TString option = "fix";
    

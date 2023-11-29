@@ -401,6 +401,7 @@ void plotFakenew_lxy::sbsDistributions(TChain *tC,  string sample="bla", string 
    UInt_t          run;
    UInt_t          luminosityBlock;
    UInt_t          nMuon;
+   Bool_t          HLT_Ele30;
    Float_t         Muon_pt[150];
    Bool_t          Muon_softMvaId[100];
    Float_t         Muon_softMva[100];
@@ -446,6 +447,7 @@ void plotFakenew_lxy::sbsDistributions(TChain *tC,  string sample="bla", string 
    TBranch        *b_run;
    TBranch        *b_luminosityBlock;
    TBranch        *b_nMuon;
+   TBranch        *b_HLT_Ele30;
    TBranch        *b_Muon_pt;
    TBranch        *b_Muon_softMvaId;
    TBranch        *b_Muon_softMva;
@@ -492,6 +494,9 @@ void plotFakenew_lxy::sbsDistributions(TChain *tC,  string sample="bla", string 
    tC->SetBranchAddress("run", &run, &b_run);
    tC->SetBranchAddress("luminosityBlock", &luminosityBlock, &b_luminosityBlock);
    tC->SetBranchAddress("nMuon", &nMuon, &b_nMuon);
+   if(string::npos != sample.find("trigger")) {
+       tC->SetBranchAddress("HLT_Ele30_WPTight_Gsf", &HLT_Ele30, &b_HLT_Ele30);
+   }
    tC->SetBranchAddress("Muon_pt", Muon_pt, &b_Muon_pt);
    tC->SetBranchAddress("Muon_softMvaId", Muon_softMvaId, &b_Muon_softMvaId);
    tC->SetBranchAddress("Muon_softMva", Muon_softMva, &b_Muon_softMva);
@@ -701,6 +706,9 @@ void plotFakenew_lxy::sbsDistributions(TChain *tC,  string sample="bla", string 
      b_Muon_looseId->GetEntry(localEntry);
      b_nMuon->GetEntry(localEntry);
      b_Muon_pt->GetEntry(localEntry);
+     if(string::npos != sample.find("trigger")) {
+         b_HLT_Ele30->GetEntry(localEntry);
+     }
 
      if(string::npos != sample.find("DoubleMuMu")) {
          b_MuonId_hlt_pt->GetEntry(localEntry);
@@ -961,7 +969,7 @@ void plotFakenew_lxy::sbsDistributions(TChain *tC,  string sample="bla", string 
    cout<< hv0_Mass_bin_muid[4]->Integral()<<"\t"<< hv0_Mass_bin_muid[5]->Integral()<<endl;
 
    
-   TString new_filename= Form("ks/histo_Weight_%s.root",sample.c_str());
+   TString new_filename= Form("%shisto_Weight_%s.root",path.c_str(), sample.c_str());
    TFile *output = TFile::Open(new_filename.Data(),"RECREATE");
    for(int k(0);k<NREG_pt;k++ ){  
      hv0_kin_pt_bin[k]->Write();
@@ -1108,29 +1116,49 @@ void plotFakenew_lxy::list_dir_file(TChain *tC, string filename) {
    RooMsgService::instance().Print() ;
 
    
-   /*plotFakenew_lxy c1;  
+   plotFakenew_lxy c1;  
    TChain* tC_22= new TChain("Events");                                                                                                                            
-   c1.list_dir_file(tC_22, "2022_data_ks.txt");                                                                                                                    
+   c1.list_dir_file(tC_22, "2022_MC.txt");                                                                                                                    
    cout<<"Entry Data "<<tC_22->GetEntries()<<endl;                                                                                                                   
-   c1.loopOverChain(tC_22, "Data_521_2022_ks_egamma_lxy_220821","Histproduction", "ks/");        
+   c1.loopOverChain(tC_22, "Data_521_2022_ks_MCall_lxy_220821","Histproduction", "ks_MC_new/");        
    delete tC_22;                                           
 
                                                                                                        
-   plotFakenew_lxy c2;
+   /*plotFakenew_lxy c2;
    TChain* tC_22_MC= new TChain("Events");                                                                                                                    
-   c2.list_dir_file(tC_22_MC, "2022_MC_ks.txt");                                                                                                            
+   c2.list_dir_file(tC_22_MC, "2022_data_ks_parking_small.txt");                                                                                                            
    cout<<"Entry MC "<<tC_22_MC->GetEntries()<<endl;                                                                                                           
-   c2.loopOverChain(tC_22_MC, "MC_516_allyear_ks_lxy_WDY180821","Histproduction_MC", "ks/");
-   delete tC_22_MC; 
- */
-   
+   c2.loopOverChain(tC_22_MC, "Data_521_2022_ks_parking_notrig_lxy_220821","Histproduction", "ks_triggers/");
+   delete tC_22_MC; */
+   /*
    plotFakenew_lxy c3;
-   TChain* tC_22_DoubleMuMu = new TChain("Events");
-   c3.list_dir_file(tC_22_DoubleMuMu, "2022_data_ks_DoubleMuMu.txt");
-   cout << "Entry Data DoubleMuMu" << tC_22_DoubleMuMu->GetEntries() << endl;
-   c3.loopOverChain(tC_22_DoubleMuMu, "Data_521_2022_ks_DoubleMuMu_lxy_slxy3_lxy8", "Histproduction", "ks_DoubleMuMu/");
-   delete tC_22_DoubleMuMu;
-   
+   TChain* tC_22_DoubleMuMu1 = new TChain("Events");
+   c3.list_dir_file(tC_22_DoubleMuMu1, "2022_data_ks_DoubleMuMu1.txt");
+   cout << "Entry Data DoubleMuMu" << tC_22_DoubleMuMu1->GetEntries() << endl;
+   c3.loopOverChain(tC_22_DoubleMuMu1, "Data_521_2022_ks_DoubleMuMu_slxy3_lxy8_v1", "Histproduction", "ks_DoubleMuMu/");
+   delete tC_22_DoubleMuMu1;
+
+   plotFakenew_lxy c4;
+   TChain* tC_22_DoubleMuMu2 = new TChain("Events");
+   c4.list_dir_file(tC_22_DoubleMuMu2, "2022_data_ks_DoubleMuMu2.txt");
+   cout << "Entry Data DoubleMuMu" << tC_22_DoubleMuMu2->GetEntries() << endl;
+   c4.loopOverChain(tC_22_DoubleMuMu2, "Data_521_2022_ks_DoubleMuMu_slxy3_lxy8_v2", "Histproduction", "ks_DoubleMuMu/");
+   delete tC_22_DoubleMuMu2;
+
+   plotFakenew_lxy c5;
+   TChain* tC_22_DoubleMuMu3 = new TChain("Events");
+   c5.list_dir_file(tC_22_DoubleMuMu3, "2022_data_ks_DoubleMuMu3.txt");
+   cout << "Entry Data DoubleMuMu" << tC_22_DoubleMuMu3->GetEntries() << endl;
+   c5.loopOverChain(tC_22_DoubleMuMu3, "Data_521_2022_ks_DoubleMuMu_slxy3_lxy8_v3", "Histproduction", "ks_DoubleMuMu/");
+   delete tC_22_DoubleMuMu3;
+
+   plotFakenew_lxy c6;
+   TChain* tC_22_DoubleMuMu4 = new TChain("Events");
+   c6.list_dir_file(tC_22_DoubleMuMu4, "2022_data_ks_DoubleMuMu4.txt");
+   cout << "Entry Data DoubleMuMu" << tC_22_DoubleMuMu4->GetEntries() << endl;
+   c6.loopOverChain(tC_22_DoubleMuMu4, "Data_521_2022_ks_DoubleMuMu_slxy3_lxy8_v4", "Histproduction", "ks_DoubleMuMu/");
+   delete tC_22_DoubleMuMu4;  
+ */
    return 0;
  }
 
