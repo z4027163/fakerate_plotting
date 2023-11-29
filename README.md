@@ -53,3 +53,9 @@ The `playfit` function goes over each of the bins and creates a fit and a plot f
 The `overlay#` functions take in the histograms output by playfit and overlay them for a final output. Currently, `overlay1`, `overlay2`, `overlay3` are the only functions supported, so one can only overlay 1,2, or 3 fits. Eventually, a general function should be made. 
 
 In general, the code then takes as input the histograms from `plotFakenew.cc`, executes `playfit` on each one, and then generates various overlays. All plots are outputed in the same directory as input histograms and are saved in pdf and png versions.
+
+## Plotting Individual Variables
+
+There is one last script (`plotVars.cc`), which allows you to look at the distribution over individual variables. Like the histogramming code, this code must also first be compiled using a command such as `make -j 8`. Then, one can run `./Varplot` to generate the plots. 
+
+The inputs and specifications are all configured in the `main` function of the file and are very similar to the histogramming code. 
