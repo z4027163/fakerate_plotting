@@ -1124,22 +1124,69 @@ int main()
   RooMsgService::instance().Print();
 
 
-  string path = "/eos/user/w/wangz/bmm6/fakerate/ks_egamma/";
+  string path = "/eos/user/w/wangz/bmm6/fakerate/ks_MC/";
   TString binning = "lxy";
 
-  plotFakenew c7;
-  TChain* tC7 = new TChain("Events");
-  c7.list_dir_file(tC7, "list.txt");
-  cout<<"Entry Data"<<tC7->GetEntries()<<endl;
-  c7.loopOverChain(tC7, Form("data_EGamma_526_2023_ks_trigger_%s", binning.Data()), "Histproduction", path, binning);
+  TString year="2022";
 
-  binning = "pT";
+  plotFakenew c1;
+  TChain *tC1 = new TChain("Events");
+  c1.list_dir_file(tC1, year+"_MC_DY.txt");
+  cout << "Entry Data " << tC1->GetEntries() << endl;
+  c1.loopOverChain(tC1, Form("MC_DY_522_%s_ks_%s", year.Data(), binning.Data()), "Histproduction", path, binning);
+  delete tC1;
 
-  plotFakenew c8;
-  TChain* tC8 = new TChain("Events");
-  c8.list_dir_file(tC8, "list.txt");
-  cout<<"Entry Data"<<tC8->GetEntries()<<endl;
-  c8.loopOverChain(tC8, Form("data_EGamma_526_2023_ks_trigger_%s", binning.Data()), "Histproduction", path, binning);
+  plotFakenew c4;
+  TChain* tC4 = new TChain("Events");
+  c4.list_dir_file(tC4, year+"_MC_TT.txt");
+  cout<<"Entry Data"<<tC4->GetEntries()<<endl;
+  c4.loopOverChain(tC4, Form("MC_TT_522_%s_ks_%s", year.Data(),binning.Data()), "Histproduction", path, binning);
+  delete tC4;
+
+  plotFakenew c5;
+  TChain* tC5 = new TChain("Events");
+  c5.list_dir_file(tC5, year+"_MC_W.txt");
+  cout<<"Entry Data"<<tC5->GetEntries()<<endl;
+  c5.loopOverChain(tC5, Form("MC_W_522_%s_ks_%s", year.Data(), binning.Data()), "Histproduction", path, binning);
+  delete tC5;
+
+  plotFakenew c6;
+  TChain* tC6 = new TChain("Events");
+  c6.list_dir_file(tC6, year+"_MC_combined.txt");
+  cout<<"Entry Data"<<tC6->GetEntries()<<endl;
+  c6.loopOverChain(tC6, Form("MC_combined_522_%s_ks_%s", year.Data(),binning.Data()), "Histproduction", path, binning);
+  delete tC6; 
+
+
+  TString binning = "pT";
+
+  plotFakenew c11;
+  TChain *tC11 = new TChain("Events");
+  c11.list_dir_file(tC11, year+"_MC_DY.txt");
+  cout << "Entry Data " << tC11->GetEntries() << endl;
+  c11.loopOverChain(tC11, Form("MC_DY_522_%s_ks_%s", year.Data(), binning.Data()), "Histproduction", path, binning);
+  delete tC11;
+
+  plotFakenew c44;
+  TChain* tC44 = new TChain("Events");
+  c44.list_dir_file(tC44, year+"_MC_TT.txt");
+  cout<<"Entry Data"<<tC44->GetEntries()<<endl;
+  c44.loopOverChain(tC44, Form("MC_TT_522_%s_ks_%s", year.Data(),binning.Data()), "Histproduction", path, binning);
+  delete tC44;
+
+  plotFakenew c55;
+  TChain* tC55 = new TChain("Events");
+  c55.list_dir_file(tC55, year+"_MC_W.txt");
+  cout<<"Entry Data"<<tC5->GetEntries()<<endl;
+  c55.loopOverChain(tC55, Form("MC_W_522_%s_ks_%s", year.Data(), binning.Data()), "Histproduction", path, binning);
+  delete tC55;
+
+  plotFakenew c6;
+  TChain* tC66 = new TChain("Events");
+  c66.list_dir_file(tC66, year+"_MC_combined.txt");
+  cout<<"Entry Data"<<tC66->GetEntries()<<endl;
+  c66.loopOverChain(tC66, Form("MC_combined_522_%s_ks_%s", year.Data(),binning.Data()), "Histproduction", path, binning);
+  delete tC66;
 
 
   return 0;

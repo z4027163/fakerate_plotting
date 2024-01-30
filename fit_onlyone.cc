@@ -53,7 +53,7 @@ vector<double> do_fit(vector<double>&param,TString option, TString name, TString
   RooAddPdf pdf_sig ("pdf_sig","",RooArgSet(G3,G2,G1),RooArgSet(G2_fract,G3_fract));
  
   RooRealVar C1("C1","",0.5,0.,10.);
-  RooRealVar C2("C2","",1.0,0.,10.);
+  RooRealVar C2("C2","",0.5,0.,10.);
   RooRealVar C3("C3","",1.0,0.,10.);
   RooRealVar C4("C4","",1.0,0.,10.);
   RooBernstein pdf_cmb("pdf_cmb","",m,RooArgList(RooConst(1.0),C1,C2));
@@ -182,6 +182,7 @@ vector<double> do_fit(vector<double>&param,TString option, TString name, TString
   if(string::npos != changename.find("data") && string::npos != changename.find("2018") )title3= "#font[42]{60 fb^{-1}(13 TeV)}";
   if(string::npos != changename.find("data") && string::npos != changename.find("2017") )title3= "#font[42]{47 fb^{-1}(13 TeV)}";
   if(string::npos != changename.find("data") && string::npos != changename.find("2022") )title3= Form("#font[42]{(13.6 TeV)}     [Muon ID = %s]",opt_point.Data());
+  if(string::npos != changename.find("data") && string::npos != changename.find("2023") )title3= Form("#font[42]{(13.6 TeV)}     [Muon ID = %s]",opt_point.Data());
 
   TString title4= "bla";
   TString title_f = "bla";
@@ -629,7 +630,7 @@ std::map<std::string, double> overlay3(TH1D* h1,TH1D* h2, TH1D* h3, TString labe
   tex.SetNDC();
   TString title = "#font[61]{CMS}";
   TString title2= "#font[52]{Preliminary}";
-  TString title3 = "2022";
+  TString title3 = "13.6 TeV";
   //if(which_file.Contains("MC")) title2 = "#font[52]{Simulation}";
   //if(which_file.Contains("2017"))title3 = "2017";
   //if(which_file.Contains("2016"))title3 = "2016";
@@ -852,7 +853,8 @@ void fitks_loop(TString syear, TString binning){
    //TH1D h1, h2, h3;
    std::map<std::string, double> bmm6;
    std::string tag;
-   for (int i=0; i<8; i++) {
+   for (int i=6; i<7; i++) {
+     // if(i<5 && i>0) continue;
       cout << "BDT is " << opt_points[i] << endl;
       TH1D* egamma_hist = playfit(Data_Egamma_file, path, option, opt_points[i], binning);
       //TH1D* parking_hist = playfit(Data_Parking_file, path, option, opt_points[i], binning);
@@ -864,23 +866,44 @@ void fitks_loop(TString syear, TString binning){
       TH1D* egamma_hist_2023 = playfit(Data_Egamma_file_2023, path, option, opt_points[i], binning);
 
       //bmm6 = overlay2(MC_hist, data_hist, "MC", "Data", path, opt_points[i], "(MC_v_Data)", binning);
-      bmm6 = overlay2(MC_hist, egamma_hist, "MC", "Data", path, opt_points[i], "(MC_v_Data)", binning);
+      bmm6 = overlay2(MC_hist, egamma_hist, "MC", "Data", path, opt_points[i], "_MC_v_Data_", binning);
+      bmm6 = overlay3(egamma_hist, egamma_hist_2023, MC_hist, "Data 2022", "Data 2023","MC 2022", path, opt_points[i], "_EGamma_twoyear_MC_", binning);
 
-      TH1D* ratio_hist = MC_hist;
-      ratio_hist->SetMinimum(0.7);
-      ratio_hist->SetMaximum(2);
-      //ratio_hist->Divide(data_hist);
-      ratio_hist->Divide(egamma_hist);
 
-      bmm6 = overlay1(ratio_hist, "ratio", path, opt_points[i], "(ratio)", binning);
-      bmm6 = overlay3(egamma_hist, egamma_hist_2023, MC_hist, "Data 2022", "Data 2023","MC 2022", path, opt_points[i], "(EGamma_twoyear_MC)", binning);
-     // bmm6 = overlay3(w_hist, dy_hist, tt_hist, "W", "DY", "TT", path, opt_points[i], "(W_v_DY_v_TT)", binning);
-     // bmm6 = overlay3(w_hist, dy_hist, tt_hist, "W", "DY", "TT", path, opt_points[i], "(W_v_DY_v_TT)", binning);
+      cout << "*************binning="<<binning <<"***************"<< endl;
+      TH1D* ratio_2022 = (TH1D*)egamma_hist->Clone();
+      //TH1D* ratio_2022 = egamma_hist;
+      ratio_2022->SetMinimum(0.7);
+      ratio_2022->SetMaximum(2);
+      ratio_2022->Divide(MC_hist);
+
+      TH1D* ratio_2023 = (TH1D*)egamma_hist_2023->Clone();
+      ratio_2023->SetMinimum(0.7);
+      ratio_2023->SetMaximum(2);
+      ratio_2023->Divide(MC_hist);
+
+      cout <<" 2022 ratio" << endl;
+      for (int i = 1; i <= ratio_2022->GetNbinsX(); ++i) {
+        double binContent = ratio_2022->GetBinContent(i);
+        double binError = ratio_2022->GetBinError(i);
+        std::cout << "Bin " << i << ": ratio = " << binContent << " +- " << binError << std::endl;
+      }
+
+      cout <<" 2023 ratio" << endl;
+      for (int i = 1; i <= ratio_2023->GetNbinsX(); ++i) {
+        double binContent = ratio_2023->GetBinContent(i);
+        double binError = ratio_2023->GetBinError(i);
+        std::cout << "Bin " << i << ": ratio = " << binContent << " +- " << binError << std::endl;
+      }
+
+      cout << "*********************************"<< endl;
+
+      bmm6 = overlay2(ratio_2022,ratio_2023, "2022 ratio","2023 ratio", path, opt_points[i], "_ratio_", binning);
+
    }
    
 }
-void fitks(){
-  
+void fit_onlyone(){
   fitks_loop("2022", "pT");
   fitks_loop("2022", "lxy");
 }

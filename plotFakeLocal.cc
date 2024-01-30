@@ -47,7 +47,7 @@
 
 using namespace std;
 using namespace RooFit;
-class plotFakenew
+class plotFakeLocal
 {
 public:
   void initPol1(double &, double &, TH1 *);
@@ -61,14 +61,14 @@ public:
   void list_dir_file(TChain *, string ob = "bla");
   void loopOverChain(TChain *, string, string, string, TString);
 
-  plotFakenew();
-  ~plotFakenew();
+  plotFakeLocal();
+  ~plotFakeLocal();
 
 private:
   bool fVerbose = true;
 };
 
-void plotFakenew::initPol1(double &p0, double &p1, TH1 *h)
+void plotFakeLocal::initPol1(double &p0, double &p1, TH1 *h)
 {
   int EDG(4), NB(EDG + 1);
   int lbin(1), hbin(h->GetNbinsX() + 1);
@@ -97,16 +97,16 @@ double iF_pol1(double *x, double *par)
 {
   return par[0] + par[1] * x[0];
 }
-plotFakenew::~plotFakenew(void)
+plotFakeLocal::~plotFakeLocal(void)
 {
   // destructor
 }
-plotFakenew::plotFakenew(void)
+plotFakeLocal::plotFakeLocal(void)
 {
   // constructor
 }
 
-void plotFakenew::sbsDistributions(TChain *tC, string sample = "bla", string what, string path, TString binning)
+void plotFakeLocal::sbsDistributions(TChain *tC, string sample = "bla", string what, string path, TString binning)
 {
   cout << "plotFake::sbsDistributions(" << sample << ", " << what << ")" << endl;
   string sbsControlPlotsFileName = what.c_str();
@@ -927,7 +927,7 @@ void plotFakenew::sbsDistributions(TChain *tC, string sample = "bla", string wha
   cout << hv0_Mass_bin_softid[2]->Integral() << "\t" << hv0_Mass_bin_softid[3]->Integral() << endl;
   cout << hv0_Mass_bin_softid[4]->Integral() << "\t" << hv0_Mass_bin_softid[5]->Integral() << endl;
 
-  TString new_filename = Form("%s/histo_%s_PROCESS.root", path.c_str(), sample.c_str());
+  TString new_filename = Form("%s/histo_%s.root", path.c_str(), sample.c_str());
   TFile *output = TFile::Open(new_filename.Data(), "RECREATE");
   for (int k(0); k < NREG_pt; k++)
   {
@@ -1036,7 +1036,7 @@ void plotFakenew::sbsDistributions(TChain *tC, string sample = "bla", string wha
 }
 
 // ----------------------------------------------------------------------
-void plotFakenew::loopOverChain(TChain *tC, string basic = "Data", string modf = "noprod", string path = "ks/", TString binning = "pT")
+void plotFakeLocal::loopOverChain(TChain *tC, string basic = "Data", string modf = "noprod", string path = "ks/", TString binning = "pT")
 {
   cout << "binning is " << binning << endl;
   // if(string::npos != modf.find("Data")) sbsDistributions_bin(tC, cutsks, "ks", modf);
@@ -1048,7 +1048,7 @@ void plotFakenew::loopOverChain(TChain *tC, string basic = "Data", string modf =
   cout << "lopping overchain function closing" << endl;
 }
 
-void plotFakenew::list_dir(TChain *tC, const char *path)
+void plotFakeLocal::list_dir(TChain *tC, const char *path)
 {
   struct dirent *entry;
   DIR *dir = opendir(path);
@@ -1094,7 +1094,7 @@ void plotFakenew::list_dir(TChain *tC, const char *path)
   closedir(dir);
 }
 
-void plotFakenew::list_dir_file(TChain *tC, string filename)
+void plotFakeLocal::list_dir_file(TChain *tC, string filename)
 {
   fstream newfile;
   newfile.open(filename, ios::in); // open a file to perform read operation using file object
@@ -1124,23 +1124,34 @@ int main()
   RooMsgService::instance().Print();
 
 
-  string path = "/eos/user/w/wangz/bmm6/fakerate/ks_egamma/";
+  string path = "/eos/user/w/wangz/bmm6/fakerate/ks_MC/";
   TString binning = "lxy";
 
-  plotFakenew c7;
-  TChain* tC7 = new TChain("Events");
-  c7.list_dir_file(tC7, "list.txt");
-  cout<<"Entry Data"<<tC7->GetEntries()<<endl;
-  c7.loopOverChain(tC7, Form("data_EGamma_526_2023_ks_trigger_%s", binning.Data()), "Histproduction", path, binning);
+  TString year="2022";
+
+//  TString inputtype[4]={"MC_DY","MC_TT","MC_W","MC_combined"};
+//  TString inputtype[1]={"MC_combined"};
+  TString inputtype[1]={"data_parking"};
+
+  for(int i=0;i<1;i++){
+      plotFakeLocal c1;
+      TChain *tC1 = new TChain("Events");
+      c1.list_dir_file(tC1, Form("%s_%s.txt",year.Data(),inputtype[i].Data()));
+      cout << "Entry Data " << tC1->GetEntries() << endl;
+      c1.loopOverChain(tC1, Form("%s_529_%s_ks_%s", inputtype[i].Data(),year.Data(), binning.Data()), "Histproduction", path, binning);
+      delete tC1;
+  }
 
   binning = "pT";
 
-  plotFakenew c8;
-  TChain* tC8 = new TChain("Events");
-  c8.list_dir_file(tC8, "list.txt");
-  cout<<"Entry Data"<<tC8->GetEntries()<<endl;
-  c8.loopOverChain(tC8, Form("data_EGamma_526_2023_ks_trigger_%s", binning.Data()), "Histproduction", path, binning);
-
+  for(int i=0;i<1;i++){
+      plotFakeLocal c1;
+      TChain *tC1 = new TChain("Events");
+      c1.list_dir_file(tC1, Form("%s_%s.txt",year.Data(),inputtype[i].Data()));
+      cout << "Entry Data " << tC1->GetEntries() << endl;
+      c1.loopOverChain(tC1, Form("%s_529_%s_ks_%s", inputtype[i].Data(),year.Data(), binning.Data()), "Histproduction", path, binning);
+      delete tC1;
+  }
 
   return 0;
 }
